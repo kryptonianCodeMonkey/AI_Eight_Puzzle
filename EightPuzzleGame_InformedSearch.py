@@ -154,6 +154,10 @@ class InformedSearchSolver:
          *loop over the curr_seq
          *check the every entry in curr_seq with goal_seq
         """
+        for (curr_row, goal_row) in zip(current_seq, goal_seq):
+            for (item1, item2) in zip(curr_row, goal_row):
+                if item1 != item2:
+                    h1 += 1
         #TODO your code end here
         
 
@@ -168,6 +172,20 @@ class InformedSearchSolver:
          *of curr_row-goal_row and curr_col-goal_col
          *absoulte value can be calculated by abs(...)
         """
+        i_curr = 0
+        j_curr = 0
+        for curr_row in current_seq:
+            for item1 in curr_row:
+                i_goal = 0
+                j_goal = 0
+                for goal_row in goal_seq:
+                    for item2 in goal_row:
+                        if item1 == item2:
+                            h2 += abs(i_curr - i_goal) + abs(j_curr - j_goal)
+                        j_goal += 1
+                    i_goal += 1
+                j_curr += 1
+            i_curr += 1
         #TODO your code end here
         
         
@@ -188,8 +206,35 @@ class InformedSearchSolver:
          *    4             4
          *reversal is 1 2 and 2 1
         """
+        curr2d = []
+        goal2d = []
+        in_row_curr = []
+        in_row_goal = []
+        rows = 0
+        cols = 0
+        for (row_curr, row_goal) in zip(curr_seq, goal_seq):
+            col_count = 0
+            for (item_curr, item_goal) in zip(row_curr, row_goal):
+                in_row_curr.append(item_curr)
+                in_row_goal.append(item_goal)
+                col_count += 1
+            curr2d.append(in_row_curr)
+            goal2d.append(in_row_goal)
+            if col_count > cols:
+                cols = col_count
+            rows += 0
+        for i in range(rows):
+            for j in range(cols):
+                if i < rows - 1:
+                    if goal2d[i][j] == curr2d[i+1][j] & goal2d[i+1][j] == curr2d[i][j]:
+                        h3 +=1
+                if j < cols - 1:
+                    if goal2d[i][j] == curr2d[i][j+1] & goal2d[i][j+1] == curr2d[i][j]:
+                        h3 +=1
+
 
         # update the heuristic value for current state
+        current.weight = h1 + h2 + h3
 
         #TODO your code end here
 
