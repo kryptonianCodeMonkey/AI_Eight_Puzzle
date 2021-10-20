@@ -11,7 +11,7 @@ Your name: Cory Knoll
 import numpy as np
 from EightPuzzleGame_State import State
 from EightPuzzleGame_UninformedSearch import UninformedSearchSolver
-#from EightPuzzleGame_InformedSearch import InformedSearchSolver
+from EightPuzzleGame_InformedSearch import InformedSearchSolver
 
 
 class EightPuzzleGame:
@@ -45,8 +45,8 @@ class EightPuzzleGame:
         UIS_solver = UninformedSearchSolver(init, goal)
         UIS_solver.run()
 
-        #IS_solver = InformedSearchSolver(init, goal)
-        #IS_solver.run()
+        IS_solver = InformedSearchSolver(init, goal)
+        IS_solver.run()
 
 
 # start the puzzle game

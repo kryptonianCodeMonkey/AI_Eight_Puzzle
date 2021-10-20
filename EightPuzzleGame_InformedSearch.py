@@ -42,10 +42,22 @@ class InformedSearchSolver:
         ret = [-1, -1]
 
         # TODO your code start here
+        for state in self.openlist:
+            if s.equals(state):
+                in_open = 1
+                ret[0] = 2
+                ret[1] = state.depth
+        #Check if state s is in closed, if so return 3
+        for state in self.closed:
+            if s.equals(state):
+                in_closed = 1
+                ret[0] = 3
+                ret[1] = state.depth
+        #state s was in neither list, return 1
+        if in_open == 0 & in_closed == 0:
+            ret[0] = 1
 
-        # the child is not in open or closed
-        # the child is already in open
-        # the child is already in closed
+        return ret
 
 
         # TODO your code start here
@@ -58,7 +70,6 @@ class InformedSearchSolver:
         *  ↑ ↓ ← → (move up, move down, move left, move right)
         * Note that in this framework the blank tile is represent by '0'
         """
-
         # add closed state
         self.closed.append(self.current)
         self.openlist.remove(self.current)
@@ -80,8 +91,33 @@ class InformedSearchSolver:
          The 4 conditions for moving the tiles all use similar logic, they only differ in the location of the 
          tile that needs to be swapped. That being the case, I will only comment the first subroutine'''
         # TODO your code start here
+        array1d = self.current.getTile_1d()
+        tmp_arr = [[0 for x in range(walk_state.shape[0])] for y in range(walk_state.shape[1])]
+
         ### ↑(move up) action ###
         if (row - 1) >= 0:
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row - 1][col]
+            tmp_arr[row - 1][col] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                         [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                         [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.depth, 0)
+            flag_depth = self.check_inclusive(tmp_state)
+            if flag_depth[0] == 1:
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
+            elif flag_depth[0] == 2:
+                if flag_depth[1] > tmp_state.depth:
+                    self.openlist.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
+            elif flag_depth[0] == 3:
+                if flag_depth[1] > tmp_state.depth:
+                    self.closed.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
             """
              *get the 2d array of current 
              *define a temp 2d array and loop over current.tile_seq
@@ -107,22 +143,89 @@ class InformedSearchSolver:
              *end;
             """
 
-
         ### ↓(move down) action ###
-
-
+        if (row + 1) < walk_state.shape[0]:
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row + 1][col]
+            tmp_arr[row + 1][col] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                        [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                        [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            flag_depth = self.check_inclusive(tmp_state)
+            if flag_depth[0] == 1:
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
+            elif flag_depth[0] == 2:
+                if flag_depth[1] > tmp_state.depth:
+                    self.openlist.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
+            elif flag_depth[0] == 3:
+                if flag_depth[1] > tmp_state.depth:
+                    self.closed.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
 
         ### ←(move left) action ###
-
-
-
+        if (col - 1) >= 0:
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row][col - 1]
+            tmp_arr[row][col - 1] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                        [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                        [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            flag_depth = self.check_inclusive(tmp_state)
+            if flag_depth[0] == 1:
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
+            elif flag_depth[0] == 2:
+                if flag_depth[1] > tmp_state.depth:
+                    self.openlist.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
+            elif flag_depth[0] == 3:
+                if flag_depth[1] > tmp_state.depth:
+                    self.closed.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
 
         ### →(move right) action ###
+        if (col + 1) < walk_state.shape[1]:
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row][col + 1]
+            tmp_arr[row][col + 1] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                        [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                        [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            flag_depth = self.check_inclusive(tmp_state)
+            if flag_depth[0] == 1:
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
+            elif flag_depth[0] == 2:
+                if flag_depth[1] > tmp_state.depth:
+                    self.openlist.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
+            elif flag_depth[0] == 3:
+                if flag_depth[1] > tmp_state.depth:
+                    self.closed.remove(tmp_state)
+                    self.heuristic_test(tmp_state)
+                    self.openlist.append(tmp_state)
 
-
-
-        # sort the open list first by h(n) then g(n)
         # Set the next current state
+        lowest_cost = self.openlist[0].depth + self.openlist[0].weight
+        best_state = self.openlist[0]
+        for state in self.openlist:
+            if state.depth + state.weight < lowest_cost:
+                lowest_cost = state.depth + state.weight
+                best_state = state
+        self.current = best_state
 
         #TODO your code end here
 
@@ -154,7 +257,7 @@ class InformedSearchSolver:
          *loop over the curr_seq
          *check the every entry in curr_seq with goal_seq
         """
-        for (curr_row, goal_row) in zip(current_seq, goal_seq):
+        for (curr_row, goal_row) in zip(curr_seq, goal_seq):
             for (item1, item2) in zip(curr_row, goal_row):
                 if item1 != item2:
                     h1 += 1
@@ -174,7 +277,7 @@ class InformedSearchSolver:
         """
         i_curr = 0
         j_curr = 0
-        for curr_row in current_seq:
+        for curr_row in curr_seq:
             for item1 in curr_row:
                 i_goal = 0
                 j_goal = 0

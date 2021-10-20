@@ -78,14 +78,14 @@ class UninformedSearchSolver:
         '''
         # TODO your code start here
         array1d = self.current.getTile_1d()
-        tmp_arr = [[0 for x in range(self.current.tile_seq.shape[0])] for y in range(self.current.tile_seq.shape[1])]
+        tmp_arr = [[0 for x in range(walk_state.shape[0])] for y in range(walk_state.shape[1])]
 
         ### ↑(move up) action ###
         #(row - 1) is checked to prevent out of bounds errors, the tile is swapped with the one above it
         if (row - 1) >= 0:
-            for i in range(self.current.tile_seq.shape[0]):
-                for j in range(self.current.tile_seq.shape[1]):
-                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
             tmp_arr[row][col] = tmp_arr[row - 1][col]
             tmp_arr[row - 1][col] = 0
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
@@ -97,10 +97,10 @@ class UninformedSearchSolver:
 
 
         ### ↓(move down) action ###
-        if (row + 1) < self.current.tile_seq.shape[0]:
-            for i in range(self.current.tile_seq.shape[0]):
-                for j in range(self.current.tile_seq.shape[1]):
-                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+        if (row + 1) < walk_state.shape[0]:
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
             tmp_arr[row][col] = tmp_arr[row + 1][col]
             tmp_arr[row + 1][col] = 0
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
@@ -113,9 +113,9 @@ class UninformedSearchSolver:
 
         ### ←(move left) action ###
         if (col - 1) >= 0:
-            for i in range(self.current.tile_seq.shape[0]):
-                for j in range(self.current.tile_seq.shape[1]):
-                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
             tmp_arr[row][col] = tmp_arr[row][col - 1]
             tmp_arr[row][col - 1] = 0
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
@@ -127,10 +127,10 @@ class UninformedSearchSolver:
 
 
         ### →(move right) action ###
-        if (col + 1) < self.current.tile_seq.shape[1]:
-            for i in range(self.current.tile_seq.shape[0]):
-                for j in range(self.current.tile_seq.shape[1]):
-                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+        if (col + 1) < walk_state.shape[1]:
+            for i in range(walk_state.shape[0]):
+                for j in range(walk_state.shape[1]):
+                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
             tmp_arr[row][col] = tmp_arr[row][col + 1]
             tmp_arr[row][col + 1] = 0
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
