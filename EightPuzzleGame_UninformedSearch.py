@@ -77,53 +77,68 @@ class UninformedSearchSolver:
             tile that needs to be swapped. That being the case, I will only comment the first subroutine
         '''
         # TODO your code start here
+        array1d = self.current.getTile_1d()
+        tmp_arr = [[0 for x in range(self.current.tile_seq.shape[0])] for y in range(self.current.tile_seq.shape[1])]
+
         ### ↑(move up) action ###
         #(row - 1) is checked to prevent out of bounds errors, the tile is swapped with the one above it
         if (row - 1) >= 0:
-            array1d = self.current.getTile_1d()
-            array1d[self.current.tile_seq.shape[0] * row + col] = array1d[self.current.tile_seq.shape[0] * (row - 1) + col]
-            array1d[self.current.tile_seq.shape[0] * (row - 1) + col] = 0
-            temp_state = State(np.array([[array1d[0], array1d[1], array1d[2]], [array1d[3], array1d[4], array1d[5]],
-                                         [array1d[6], array1d[7], array1d[8]]]), self.current.depth+1, 0)
-            flag = self.check_inclusive(temp_state)
+            for i in range(self.current.tile_seq.shape[0]):
+                for j in range(self.current.tile_seq.shape[1]):
+                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row - 1][col]
+            tmp_arr[row - 1][col] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                         [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                         [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.depth, 0)
+            flag = self.check_inclusive(tmp_state)
             if flag == 1:
-                self.openlist.append(temp_state)
+                self.openlist.append(tmp_state)
 
 
         ### ↓(move down) action ###
-        if (row + 1) <= self.current.tile_seq.shape[0] - 1:
-            array1d = self.current.getTile_1d()
-            array1d[self.current.tile_seq.shape[0] * row + col] = array1d[self.current.tile_seq.shape[0] * (row + 1) + col]
-            array1d[self.current.tile_seq.shape[0] * (row + 1) + col] = 0
-            temp_state = State(np.array([[array1d[0], array1d[1], array1d[2]], [array1d[3], array1d[4], array1d[5]],
-                                         [array1d[6], array1d[7], array1d[8]]]), self.current.depth+1, 0)
-            flag = self.check_inclusive(temp_state)
+        if (row + 1) < self.current.tile_seq.shape[0]:
+            for i in range(self.current.tile_seq.shape[0]):
+                for j in range(self.current.tile_seq.shape[1]):
+                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row + 1][col]
+            tmp_arr[row + 1][col] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                        [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                        [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            flag = self.check_inclusive(tmp_state)
             if flag == 1:
-                self.openlist.append(temp_state)
+                self.openlist.append(tmp_state)
 
 
         ### ←(move left) action ###
         if (col - 1) >= 0:
-            array1d = self.current.getTile_1d()
-            array1d[self.current.tile_seq.shape[0] * row + col] = array1d[self.current.tile_seq.shape[0] * row + col - 1]
-            array1d[self.current.tile_seq.shape[0] * row + col - 1] = 0
-            temp_state = State(np.array([[array1d[0], array1d[1], array1d[2]], [array1d[3], array1d[4], array1d[5]],
-                                         [array1d[6], array1d[7], array1d[8]]]), self.current.depth+1, 0)
-            flag = self.check_inclusive(temp_state)
+            for i in range(self.current.tile_seq.shape[0]):
+                for j in range(self.current.tile_seq.shape[1]):
+                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row][col - 1]
+            tmp_arr[row][col - 1] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                        [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                        [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            flag = self.check_inclusive(tmp_state)
             if flag == 1:
-                self.openlist.append(temp_state)
+                self.openlist.append(tmp_state)
 
 
         ### →(move right) action ###
-        if (col + 1) <= self.current.tile_seq.shape[1] - 1:
-            array1d = self.current.getTile_1d()
-            array1d[self.current.tile_seq.shape[0] * row + col] = array1d[self.current.tile_seq.shape[0] * row + col + 1]
-            array1d[self.current.tile_seq.shape[0] * row + col + 1] = 0
-            temp_state = State(np.array([[array1d[0], array1d[1], array1d[2]], [array1d[3], array1d[4], array1d[5]],
-                                         [array1d[6], array1d[7], array1d[8]]]), self.current.depth+1, 0)
-            flag = self.check_inclusive(temp_state)
+        if (col + 1) < self.current.tile_seq.shape[1]:
+            for i in range(self.current.tile_seq.shape[0]):
+                for j in range(self.current.tile_seq.shape[1]):
+                    tmp_arr[i][j] = array1d[self.current.tile_seq.shape[0] * i + j]
+            tmp_arr[row][col] = tmp_arr[row][col + 1]
+            tmp_arr[row][col + 1] = 0
+            tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
+                                        [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
+                                        [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            flag = self.check_inclusive(tmp_state)
             if flag == 1:
-                self.openlist.append(temp_state)
+                self.openlist.append(tmp_state)
 
         # Set the next current state
         self.current = self.openlist[0]
