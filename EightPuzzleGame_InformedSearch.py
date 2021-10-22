@@ -42,24 +42,24 @@ class InformedSearchSolver:
         ret = [-1, -1]
 
         # TODO your code start here
+        # Check if state s is in openlist, if so ret[0] = 2 and ret[1] = state.depth
         for state in self.openlist:
             if s.equals(state):
                 in_open = 1
                 ret[0] = 2
                 ret[1] = state.depth
-        #Check if state s is in closed, if so return 3
+        # Check if state s is in closed, if so ret[0] = 3 and ret[1] = state.depth
         for state in self.closed:
             if s.equals(state):
                 in_closed = 1
                 ret[0] = 3
                 ret[1] = state.depth
-        #state s was in neither list, return 1
+        # state s was in neither list, ret[0] = 1
         if in_open == 0 & in_closed == 0:
             ret[0] = 1
 
+        # return code and depth array, ret[]
         return ret
-
-
         # TODO your code start here
 
 
@@ -85,146 +85,135 @@ class InformedSearchSolver:
                     col = j
                     break
 
-        self.depth += 1
+        self.depth = self.current.depth + 1
 
         ''' The following program is used to do the state space actions
          The 4 conditions for moving the tiles all use similar logic, they only differ in the location of the 
          tile that needs to be swapped. That being the case, I will only comment the first subroutine'''
         # TODO your code start here
-        array1d = self.current.getTile_1d()
+        # initialize tmp_array to be an array of 0's with dimensions matching walk_state
         tmp_arr = [[0 for x in range(walk_state.shape[0])] for y in range(walk_state.shape[1])]
 
         ### ↑(move up) action ###
+        # (row - 1) is checked to prevent out of bounds errors, the tile is swapped with the one above it
         if (row - 1) >= 0:
+            # copy walk_state to tmp_arr
             for i in range(walk_state.shape[0]):
                 for j in range(walk_state.shape[1]):
-                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+                    tmp_arr[i][j] = walk_state[i][j]
+            # swap 0 tile in tmp_arr with tile above it
             tmp_arr[row][col] = tmp_arr[row - 1][col]
             tmp_arr[row - 1][col] = 0
+            # create new state object with tmp_array state, current depth, and no weight
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
                                          [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
-                                         [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.depth, 0)
+                                         [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            # determine get list and depth of any states matching tmp_state already in openlist or closed list
             flag_depth = self.check_inclusive(tmp_state)
+            # if tmp_state is in neither list, get heuristic weight and add to openlist
             if flag_depth[0] == 1:
                 self.heuristic_test(tmp_state)
                 self.openlist.append(tmp_state)
-            elif flag_depth[0] == 2:
-                if flag_depth[1] > tmp_state.depth:
-                    self.openlist.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
-            elif flag_depth[0] == 3:
-                if flag_depth[1] > tmp_state.depth:
-                    self.closed.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
-            """
-             *get the 2d array of current 
-             *define a temp 2d array and loop over current.tile_seq
-             *pass the value from current.tile_seq to temp array
-             *↑ is correspond to (row, col) and (row-1, col)
-             *exchange these two tiles of temp
-             *define a new temp state via temp array
-             *call check_inclusive(temp state)
-             *do the next steps according to flag
-             *if flag = 1 //not in open and closed
-             *begin
-             *assign the child a heuristic value via heuristic_test(temp state);
-             *add the child to open
-             *end;
-             *if flag = 2 //in the open list
-             *if the child was reached by a shorter path
-             *then give the state on open the shorter path
-             *if flag = 3 //in the closed list
-             *if the child was reached by a shorter path then
-             *begin
-             *remove the state from closed;
-             *add the child to open
-             *end;
-            """
+            # if tmp_state already in either list but depth is lower than state in list, remove it,
+            # get heuristic weight of tmp_array and add tmp_state to openlist
+            elif (flag_depth[0] == 2 | flag_depth[0] == 3) & flag_depth[1] > tmp_state.depth:
+                list = self.openlist if flag_depth[0] == 2 else self.closed
+                list.remove(tmp_state)
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
 
         ### ↓(move down) action ###
+        # (row + 1) is checked to prevent out of bounds errors, the tile is swapped with the one below it
         if (row + 1) < walk_state.shape[0]:
+            # copy walk_state to tmp_arr
             for i in range(walk_state.shape[0]):
                 for j in range(walk_state.shape[1]):
-                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+                    tmp_arr[i][j] = walk_state[i][j]
+            # swap 0 tile in tmp_arr with tile below it
             tmp_arr[row][col] = tmp_arr[row + 1][col]
             tmp_arr[row + 1][col] = 0
+            # create new state object with tmp_array state, current depth, and no weight
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
                                         [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
                                         [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            # determine get list and depth of any states matching tmp_state already in openlist or closed list
             flag_depth = self.check_inclusive(tmp_state)
+            # if tmp_state is in neither list, get heuristic weight and add to openlist
             if flag_depth[0] == 1:
                 self.heuristic_test(tmp_state)
                 self.openlist.append(tmp_state)
-            elif flag_depth[0] == 2:
-                if flag_depth[1] > tmp_state.depth:
-                    self.openlist.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
-            elif flag_depth[0] == 3:
-                if flag_depth[1] > tmp_state.depth:
-                    self.closed.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
+            # if tmp_state already in either list but depth is lower than state in list, remove it,
+            # get heuristic weight of tmp_array and add tmp_state to openlist
+            elif (flag_depth[0] == 2 | flag_depth[0] == 3) & flag_depth[1] > tmp_state.depth:
+                list = self.openlist if flag_depth[0] == 2 else self.closed
+                list.remove(tmp_state)
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
 
         ### ←(move left) action ###
+        # (col - 1) is checked to prevent out of bounds errors, the tile is swapped with the one to the left of it
         if (col - 1) >= 0:
+            # copy walk_state to tmp_arr
             for i in range(walk_state.shape[0]):
                 for j in range(walk_state.shape[1]):
-                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+                    tmp_arr[i][j] = walk_state[i][j]
+            # swap 0 tile in tmp_arr with tile to left of it
             tmp_arr[row][col] = tmp_arr[row][col - 1]
             tmp_arr[row][col - 1] = 0
+            # create new state object with tmp_array state, current depth, and no weight
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
                                         [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
                                         [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            # determine get list and depth of any states matching tmp_state already in openlist or closed list
             flag_depth = self.check_inclusive(tmp_state)
+            # if tmp_state is in neither list, get heuristic weight and add to openlist
             if flag_depth[0] == 1:
                 self.heuristic_test(tmp_state)
                 self.openlist.append(tmp_state)
-            elif flag_depth[0] == 2:
-                if flag_depth[1] > tmp_state.depth:
-                    self.openlist.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
-            elif flag_depth[0] == 3:
-                if flag_depth[1] > tmp_state.depth:
-                    self.closed.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
+            # if tmp_state already in either list but depth is lower than state in list, remove it,
+            # get heuristic weight of tmp_array and add tmp_state to openlist
+            elif (flag_depth[0] == 2 | flag_depth[0] == 3) & flag_depth[1] > tmp_state.depth:
+                list = self.openlist if flag_depth[0] == 2 else self.closed
+                list.remove(tmp_state)
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
 
         ### →(move right) action ###
+        # (col + 1) is checked to prevent out of bounds errors, the tile is swapped with the one tot he right of it
         if (col + 1) < walk_state.shape[1]:
+            # copy walk_state to tmp_arr
             for i in range(walk_state.shape[0]):
                 for j in range(walk_state.shape[1]):
-                    tmp_arr[i][j] = array1d[walk_state.shape[0] * i + j]
+                    tmp_arr[i][j] = walk_state[i][j]
+            # swap 0 tile in tmp_arr with tile to right of it
             tmp_arr[row][col] = tmp_arr[row][col + 1]
             tmp_arr[row][col + 1] = 0
+            # create new state object with tmp_array state, current depth, and no weight
             tmp_state = State(np.array([[tmp_arr[0][0], tmp_arr[0][1], tmp_arr[0][2]],
                                         [tmp_arr[1][0], tmp_arr[1][1], tmp_arr[1][2]],
                                         [tmp_arr[2][0], tmp_arr[2][1], tmp_arr[2][2]]]), self.current.depth + 1, 0)
+            # determine get list and depth of any states matching tmp_state already in openlist or closed list
             flag_depth = self.check_inclusive(tmp_state)
+            # if tmp_state is in neither list, get heuristic weight and add to openlist
             if flag_depth[0] == 1:
                 self.heuristic_test(tmp_state)
                 self.openlist.append(tmp_state)
-            elif flag_depth[0] == 2:
-                if flag_depth[1] > tmp_state.depth:
-                    self.openlist.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
-            elif flag_depth[0] == 3:
-                if flag_depth[1] > tmp_state.depth:
-                    self.closed.remove(tmp_state)
-                    self.heuristic_test(tmp_state)
-                    self.openlist.append(tmp_state)
+            # if tmp_state already in either list but depth is lower than state in list, remove it,
+            # get heuristic weight of tmp_array and add tmp_state to openlist
+            elif (flag_depth[0] == 2 | flag_depth[0] == 3) & flag_depth[1] > tmp_state.depth:
+                list = self.openlist if flag_depth[0] == 2 else self.closed
+                list.remove(tmp_state)
+                self.heuristic_test(tmp_state)
+                self.openlist.append(tmp_state)
 
-        # Set the next current state
+        # find the state in openlist with the best (lowest cost) evaluation of depth + weight
         lowest_cost = self.openlist[0].depth + self.openlist[0].weight
         best_state = self.openlist[0]
         for state in self.openlist:
             if state.depth + state.weight < lowest_cost:
                 lowest_cost = state.depth + state.weight
                 best_state = state
+        # set current state to the one with the lowest cost
         self.current = best_state
 
         #TODO your code end here
@@ -253,12 +242,11 @@ class InformedSearchSolver:
         # (1) Tiles out of place
         h1 = 0
         #TODO your code start here
-        """
-         *loop over the curr_seq
-         *check the every entry in curr_seq with goal_seq
-        """
+        # count how many tiles are not in their corresponding goal location
+        # loop over both current and goal states
         for (curr_row, goal_row) in zip(curr_seq, goal_seq):
             for (item1, item2) in zip(curr_row, goal_row):
+                # if corresponding tiles don't match between current and goal states, increment h1
                 if item1 != item2:
                     h1 += 1
         #TODO your code end here
@@ -267,23 +255,19 @@ class InformedSearchSolver:
         # (2) Sum of distances out of place
         h2 = 0
         #TODO your code start here
-        """
-         *loop over the goal_seq and curr_seq in nested way
-         *locate the entry which has the same value in 
-         *curr_seq and goal_seq then calculate the offset
-         *through the absolute value of two differences
-         *of curr_row-goal_row and curr_col-goal_col
-         *absoulte value can be calculated by abs(...)
-        """
+        # sum the distances that each tile is from its corresponding goal locations
         i_curr = 0
         j_curr = 0
+        # loop over each tile in current state
         for curr_row in curr_seq:
             for item1 in curr_row:
                 i_goal = 0
                 j_goal = 0
+                # loop over each tile in goal state to find corresponding tile
                 for goal_row in goal_seq:
                     for item2 in goal_row:
                         if item1 == item2:
+                            # match found, add vertical offset and horizontal offset to h2
                             h2 += abs(i_curr - i_goal) + abs(j_curr - j_goal)
                         j_goal += 1
                     i_goal += 1
@@ -295,47 +279,18 @@ class InformedSearchSolver:
         # (3) 2 x the number of direct tile reversals
         h3 = 0
         #TODO your code start here
-        """
-         *loop over the curr_seq
-         *use a Γ(gamma)shap slider to walk throught curr_seq and goal_seq
-         *rule out the entry with value 0
-         *set the boundry restriction
-         *don't forget to time 2 at last
-         *for example 
-         *goal_seq  1 2 3   curr_seq  2 1 3 the Γ shape starts 
-         *       4 5 6          4 5 6
-         *       7 8 0          7 8 0
-         *with 1 2 in goal_seq and 2 1 in curr_seq thus the 
-         *    4             4
-         *reversal is 1 2 and 2 1
-        """
-        curr2d = []
-        goal2d = []
-        in_row_curr = []
-        in_row_goal = []
-        rows = 0
-        cols = 0
-        for (row_curr, row_goal) in zip(curr_seq, goal_seq):
-            col_count = 0
-            for (item_curr, item_goal) in zip(row_curr, row_goal):
-                in_row_curr.append(item_curr)
-                in_row_goal.append(item_goal)
-                col_count += 1
-            curr2d.append(in_row_curr)
-            goal2d.append(in_row_goal)
-            if col_count > cols:
-                cols = col_count
-            rows += 0
-        for i in range(rows):
-            for j in range(cols):
-                if i < rows - 1:
-                    if goal2d[i][j] == curr2d[i+1][j] & goal2d[i+1][j] == curr2d[i][j]:
-                        h3 +=1
-                if j < cols - 1:
-                    if goal2d[i][j] == curr2d[i][j+1] & goal2d[i][j+1] == curr2d[i][j]:
-                        h3 +=1
-
-
+        # check for any adjacent tiles that are mirrored from their goal state counterparts (costly to fix)
+        # loop through each tile in both current and goal states
+        for i in range(goal_seq.shape[0]):
+            for j in range(goal_seq.shape[1]):
+                # if tile is not at far right column, check the tile with the one to the right to see if it's mirrored,
+                # if so, increment h3
+                if i < goal_seq.shape[0] - 1 & goal_seq[i][j] == curr_seq[i+1][j] & goal_seq[i+1][j] == curr_seq[i][j]:
+                    h3 +=1
+                # if tile is not at bottom row, check the tile with the one below to see if it's mirrored,
+                # if so, increment h3
+                if j < goal_seq.shape[1] - 1 & goal_seq[i][j] == curr_seq[i][j+1] & goal_seq[i][j+1] == curr_seq[i][j]:
+                    h3 +=1
         # update the heuristic value for current state
         current.weight = h1 + h2 + h3
 
