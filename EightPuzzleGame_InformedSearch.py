@@ -17,6 +17,7 @@ Evaluation function is used to express the quality of informedness of a heuristi
 class InformedSearchSolver:
     current = State()
     goal = State()
+    tf_goal = [] #transformed goal tile sequence used for heuristic 4
     openlist = []
     closed = []
     depth = 0
@@ -25,6 +26,12 @@ class InformedSearchSolver:
         self.current = current
         self.goal = goal
         self.openlist.append(current)
+        #tf_goal is a transformation of the gaol sequence with horizontal and veritical swapped (mirrored over the diagonal)
+        for y in range(goal.tile_seq.shape[1]):
+            self.tf_goal.append([x for x in range(goal.tile_seq.shape[0])])
+        for i in range(goal.tile_seq.shape[0]):
+            for j in range(goal.tile_seq.shape[1]):
+                self.tf_goal[j][i] = goal.tile_seq[i][j]
 
     def sortFun(self, e):
         return e.weight
@@ -291,13 +298,28 @@ class InformedSearchSolver:
                 # if so, increment h3
                 if j < goal_seq.shape[1] - 1 & goal_seq[i][j] == curr_seq[i][j+1] & goal_seq[i][j+1] == curr_seq[i][j]:
                     h3 +=1
+        # double h3 because tile reversals are particularly hard to fix
+        h3 *= 2
+
+        # (Bonus) (4) total tiles out of row plus total tiles out of column
+        # set h4 initial value to be the total titles in puzzle, then subtracting those in correct rows/columns
+        h4 = goal_seq.shape[0] * goal_seq.shape[1]
+        self.tf_goal
+        #deduct number of current tiles in correct goal row
+        for i in range(goal_seq.shape[0]):
+            for j in range(goal_seq.shape[1]):
+                if np.isin(curr_seq[i][j], goal_seq[i]):
+                    h4 -= 1
+        #deduct number of current tiles in correct goal column
+        for j in range(goal_seq.shape[1]):
+            for i in range(goal_seq.shape[0]):
+                if np.isin(curr_seq[i][j], self.tf_goal[j]):
+                    h4 -= 1
+
         # update the heuristic value for current state
-        current.weight = h1 + h2 + h3
+        current.weight = h1 + h2 + h3 + h4
 
         #TODO your code end here
-
-
-
 
     # You can change the following code to print all the states on the search path
     def run(self):

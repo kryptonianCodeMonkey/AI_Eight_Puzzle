@@ -185,6 +185,6 @@ class UninformedSearchSolver:
             pathstate_str = np.array2string(self.current.tile_seq, precision=2, separator=' ')
             print(pathstate_str[1:-1])
             path += 1
-        print("\n It took ", path, " iterations to reach to the goal state")
+        print("\nIt took ", path, " iterations to reach to the goal state")
         print("The length of the path is: ", self.current.depth)
 
