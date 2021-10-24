@@ -9,6 +9,7 @@ Your name: Cory Knoll
 '''
 
 import numpy as np
+import time as time
 from EightPuzzleGame_State import State
 from EightPuzzleGame_UninformedSearch import UninformedSearchSolver
 from EightPuzzleGame_InformedSearch import InformedSearchSolver
@@ -24,8 +25,8 @@ class EightPuzzleGame:
     def start(self):
         '''Please test your program with different start state to explore the feature of the algorithms'''
         # initialize the init state and goal state as 2d array
-        #init_tile = np.array([[2, 3, 6], [1, 4, 8], [7, 5, 0]])
-        init_tile = np.array([[1, 2, 3], [0, 4, 6], [7, 5, 8]])
+        init_tile = np.array([[2, 3, 6], [1, 4, 8], [7, 5, 0]])
+        #init_tile = np.array([[1, 0, 3], [4, 5, 8], [6, 7, 2]])
         init = State(init_tile, 0, 0) #initial state: init_tile, depth=0, weight=0
         print("\nStart state:")
         init_str = np.array2string(init_tile, precision=2, separator=' ')
@@ -42,14 +43,25 @@ class EightPuzzleGame:
 
         self.tiles = 8
 
+        t0 = time.time()
         UIS_solver = UninformedSearchSolver(init, goal)
         UIS_solver.run()
+        t1 = time.time()
+        computationalTime = t1-t0
+        print("\nThe computational time for Uninformed Search was:")
+        print(computationalTime)
 
+        t0 = time.time()
         IS_solver = InformedSearchSolver(init, goal)
         IS_solver.run()
+        t1 = time.time()
+        computationalTime = t1-t0
+        print("\nThe computational time for Informed Search was:")
+        print(computationalTime)
 
 
 # start the puzzle game
 epp = EightPuzzleGame()
 epp.start()
 
+ 
